@@ -51,7 +51,7 @@ function removeOutputGood(code: string) {
 }
 
 function totalPrice(goods: GoodsList) {
-    return sum(goods.map(good => good.price * good.number))
+    return Math.round(sum(goods.map(good => good.price * good.number)) * 100) / 100
 }
 
 function generateScript(): string {
@@ -95,7 +95,7 @@ async function handleCodegenClick() {
                     <el-input class="input" type="number" v-model="good.number">
                         <template #prepend>{{ good.price }} ×</template>
                         <template #append>
-                            = {{ good.price * good.number }}
+                            = {{ Math.round(good.price * good.number * 100) / 100 }}
                             ({{ (good.price * good.number / totalPrice(inputGoods) * 100).toFixed(1) }}%)
                         </template>
                     </el-input>
@@ -134,7 +134,7 @@ async function handleCodegenClick() {
                     <el-input class="input" type="number" v-model="good.number">
                         <template #prepend>{{ good.price }} ×</template>
                         <template #append>
-                            = {{ good.price * good.number }}
+                            = {{ Math.round(good.price * good.number * 100) / 100 }}
                             ({{ (good.price * good.number / totalPrice(outputGoods) * 100).toFixed(1) }}%)
                         </template>
                     </el-input>
