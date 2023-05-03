@@ -89,7 +89,7 @@ function generateScript(): string {
                 <el-descriptions-item label="收入">
                     {{ totalPrice(outputGoods) }}</el-descriptions-item>
                 <el-descriptions-item label="利润">
-                    {{ totalPrice(outputGoods) - totalPrice(inputGoods) }}
+                    {{ (totalPrice(outputGoods) - totalPrice(inputGoods)).toFixed(2) }}
                 </el-descriptions-item>
                 <el-descriptions-item label="利润率">
                     {{ ((totalPrice(outputGoods) - totalPrice(inputGoods)) / totalPrice(inputGoods) * 100).toFixed(2) }}%
@@ -99,7 +99,7 @@ function generateScript(): string {
             <pre class="codeblock">{{ generateScript() }}</pre>
         </div>
         <div class="right">
-            <el-cascader :options="goodsStore.cascadeOptions" placeholder="添加输出商品" @change="addOutputGood"></el-cascader>
+            <el-cascader class="cascader" :options="goodsStore.cascadeOptions" placeholder="添加输出商品" @change="addOutputGood"></el-cascader>
             <div class="list">
                 <template v-for="good in outputGoods">
                     <el-text>{{ goodsStore.$state.goods.find(thisGood => thisGood.code === good.code)!.cn_name }}</el-text>

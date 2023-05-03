@@ -7,7 +7,7 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "v3-products-editor",
+    "productName": "v3-pm-editor",
     "version": "0.0.0"
   },
   "tauri": {
@@ -27,7 +27,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.com.lomirus.v3-pm-editor",
       "targets": "all"
     },
     "security": {
@@ -40,9 +40,11 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "v3-products-editor",
+        "title": "Victoria 3 PM 编辑器",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "minWidth": 1100,
+        "minHeight": 600
       }
     ]
   }
