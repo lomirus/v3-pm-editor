@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
-import { useGoodsStore } from '../store'
+import { writeText } from '@tauri-apps/api/clipboard';
+import { isPermissionGranted, requestPermission, sendNotification } from '@tauri-apps/api/notification';
+import { ElMessage } from 'element-plus'
+import { usePmStore } from '../store'
 import { sum } from '../utils'
 
 type GoodsList = {
@@ -10,14 +13,14 @@ type GoodsList = {
     number: number
 }[];
 
-const goodsStore = useGoodsStore();
+const pmStore = usePmStore();
 
 let inputGoods = reactive<GoodsList>([])
 let outputGoods = reactive<GoodsList>([])
 
 function addInputGood(value: any) {
     const code: string = value[1];
-    const good = goodsStore.$state.goods.find(good => good.code === code)!;
+    const good = pmStore.$state.goods.find(good => good.code === code)!;
     inputGoods.push({
         code,
         name: good.cn_name,
@@ -28,7 +31,7 @@ function addInputGood(value: any) {
 
 function addOutputGood(value: any) {
     const code: string = value[1];
-    const good = goodsStore.$state.goods.find(good => good.code === code)!;
+    const good = pmStore.$state.goods.find(good => good.code === code)!;
     outputGoods.push({
         code,
         name: good.cn_name,
@@ -52,8 +55,8 @@ function totalPrice(goods: GoodsList) {
 }
 
 function generateScript(): string {
-    return `pm_NAME = {
-    texture = "gfx/interface/icons/production_method_icons/NAME.dds"
+    return `pm_${pmStore.pm} = {
+    texture = "gfx/interface/icons/production_method_icons/${pmStore.pm}.dds"
     
     building_modifiers = {
         workforce_scaled = {
@@ -67,18 +70,36 @@ function generateScript(): string {
 }
 `
 }
+
+async function handleCodegenClick() {
+    await writeText(generateScript())
+    let permissionGranted = await isPermissionGranted();
+    if (!permissionGranted) {
+        const permission = await requestPermission();
+        permissionGranted = permission === 'granted';
+    }
+    if (permissionGranted) {
+        sendNotification('已复制至剪贴板');
+    }
+}
 </script>
 
 <template>
     <div class="container">
         <div class="left">
-            <el-cascader class="cascader" :options="goodsStore.cascadeOptions" placeholder="添加输入商品"
+            <el-cascader class="cascader" :options="pmStore.cascadeOptions" placeholder="添加输入商品"
                 @change="addInputGood"></el-cascader>
             <div class="list">
                 <template v-for="good in inputGoods">
-                    <el-text>{{ goodsStore.$state.goods.find(thisGood => thisGood.code === good.code)!.cn_name }}</el-text>
-                    <el-input type="number" v-model="good.number"></el-input>
-                    <el-button @click="removeInputGood(good.code)">删除</el-button>
+                    <el-text>{{ pmStore.$state.goods.find(thisGood => thisGood.code === good.code)!.cn_name }}</el-text>
+                    <el-input class="input" type="number" v-model="good.number">
+                        <template #prepend>{{ good.price }} ×</template>
+                        <template #append>
+                            = {{ good.price * good.number }}
+                            ({{ (good.price * good.number / totalPrice(inputGoods) * 100).toFixed(1) }}%)
+                        </template>
+                    </el-input>
+                    <el-button class="delete" @click="removeInputGood(good.code)">删除</el-button>
                 </template>
             </div>
         </div>
@@ -95,15 +116,28 @@ function generateScript(): string {
                     {{ ((totalPrice(outputGoods) - totalPrice(inputGoods)) / totalPrice(inputGoods) * 100).toFixed(2) }}%
                 </el-descriptions-item>
             </el-descriptions>
+            <div class="pm-name">
+                PM标识代码：<el-input class="input" placeholder="生产方式标识代码" v-model="pmStore.$state.pm">
+                    <template #prepend>pm_</template>
+                </el-input>
+            </div>
 
-            <pre class="codeblock">{{ generateScript() }}</pre>
+
+            <el-button class="codegen-button" @click="handleCodegenClick">生成代码并复制</el-button>
         </div>
         <div class="right">
-            <el-cascader class="cascader" :options="goodsStore.cascadeOptions" placeholder="添加输出商品" @change="addOutputGood"></el-cascader>
+            <el-cascader class="cascader" :options="pmStore.cascadeOptions" placeholder="添加输出商品"
+                @change="addOutputGood"></el-cascader>
             <div class="list">
                 <template v-for="good in outputGoods">
-                    <el-text>{{ goodsStore.$state.goods.find(thisGood => thisGood.code === good.code)!.cn_name }}</el-text>
-                    <el-input type="number" v-model="good.number"></el-input>
+                    <el-text>{{ pmStore.$state.goods.find(thisGood => thisGood.code === good.code)!.cn_name }}</el-text>
+                    <el-input class="input" type="number" v-model="good.number">
+                        <template #prepend>{{ good.price }} ×</template>
+                        <template #append>
+                            = {{ good.price * good.number }}
+                            ({{ (good.price * good.number / totalPrice(outputGoods) * 100).toFixed(1) }}%)
+                        </template>
+                    </el-input>
                     <el-button @click="removeOutputGood(good.code)">删除</el-button>
                 </template>
             </div>
@@ -122,27 +156,55 @@ function generateScript(): string {
     align-items: center;
     flex-direction: column;
 
-    .codeblock {
-        background-color: #eeeeee;
-        padding: 18px;
-        border-radius: 16px;
+    .descriptions {
+        width: 280px
+    }
+
+    .pm-name {
+        margin-top: 18px;
+        display: flex;
+
+        .input {
+            width: 200px;
+        }
+    }
+
+    .codegen-button {
+        margin-top: 18px;
     }
 }
 
-.content:deep(.descriptions) {
-    width: 280px
-}
 
 .left:deep(.cascader),
 .right:deep(.cascader) {
-    width: 280px
+    width: 420px;
+
+    .delete {
+        width: 20px
+    }
 }
 
 .left>.list,
 .right>.list {
     margin-top: 8px;
     display: grid;
-    grid-template-columns: 110px 100px auto;
-}
-</style>
+    width: 420px;
+    grid-template-columns: 110px auto 60px;
+
+    .input {
+        display: grid;
+        grid-template-columns: 60px 1fr 120px;
+
+    }
+
+    &:deep(.el-input-group__prepend) {
+        padding: 0;
+        ;
+    }
+
+    &:deep(.el-input-group__append) {
+        padding: 0;
+        ;
+    }
+}</style>
 

@@ -16,6 +16,13 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "clipboard": {
+        "readText": false,
+        "writeText": true
+      },
+      "notification": {
+        "all": true
       }
     },
     "bundle": {
@@ -41,10 +48,9 @@
         "fullscreen": false,
         "resizable": true,
         "title": "Victoria 3 PM 编辑器",
-        "width": 800,
-        "height": 600,
-        "minWidth": 1100,
-        "minHeight": 600
+        "height": 500,
+        "minWidth": 1200,
+        "minHeight": 500
       }
     ]
   }

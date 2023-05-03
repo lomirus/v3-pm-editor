@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { parseGoodsSheet, selectFile } from '../utils'
-import { useGoodsStore } from '../store'
+import { usePmStore } from '../store'
 
-const goodsStore = useGoodsStore();
+const pmStore = usePmStore();
 
 async function handleImport() {
   const file = await selectFile()
-  goodsStore.$patch({
+  pmStore.$patch({
     goods: parseGoodsSheet(file)
   })
 }
@@ -16,14 +16,14 @@ async function handleImport() {
 <template>
   <header>
     <el-button @click="handleImport">导入商品表</el-button>
-    <el-text class="import-state">{{ goodsStore.$state.goods.length === 0 ?
+    <el-text class="import-state">{{ pmStore.$state.goods.length === 0 ?
       '未导入' :
-      `已导入${goodsStore.$state.goods.length}种商品`
+      `已导入${pmStore.$state.goods.length}种商品`
     }}</el-text>
   </header>
 </template>
 
-<style scoped>
+<style scoped lang="less">
 header {
   margin-bottom: 16px;
 }

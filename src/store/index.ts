@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia'
 import { Good } from '../types'
 
-export const useGoodsStore = defineStore('goods', {
+export const usePmStore = defineStore('goods', {
     state: () => ({
-        goods: [] as Good[]
+        goods: [] as Good[],
+        pm: 'DEFAULT_NAME'
     }),
     getters: {
         cascadeOptions(state) {
