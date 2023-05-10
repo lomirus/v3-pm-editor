@@ -7,7 +7,7 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "v3-pm-editor",
+    "productName": "Victoria 3 产品配方编辑器",
     "version": "0.0.0"
   },
   "tauri": {
@@ -47,7 +47,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "Victoria 3 PM 编辑器",
+        "title": "Victoria 3 产品配方编辑器",
         "height": 500,
         "minWidth": 1200,
         "minHeight": 500
